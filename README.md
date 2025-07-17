@@ -11,20 +11,20 @@ This is a Book Borrowing Management App built using Android (Java) for the front
 - View borrows by individual borrower or all
 - Dialog-based UI for adding/editing books, borrowers, and borrow records
 - Retrofit integration with Bearer token
+
 ## Screenshots
 
-- Login Screen
-  <img width="548" height="1099" alt="image" src="https://github.com/user-attachments/assets/4a1f8839-406d-4b8f-994e-5a94e5afb2d7" />
+### Login Screen
+<img width="300" alt="Login Screen" src="https://github.com/user-attachments/assets/4a1f8839-406d-4b8f-994e-5a94e5afb2d7" />
 
-- Dashboard
-  <img width="578" height="1080" alt="image" src="https://github.com/user-attachments/assets/63c45d95-4ba0-4e83-998e-6cabfb85476d" />
+### Dashboard
+<img width="300" alt="Dashboard" src="https://github.com/user-attachments/assets/63c45d95-4ba0-4e83-998e-6cabfb85476d" />
 
-- Book
-  <img width="530" height="1066" alt="image" src="https://github.com/user-attachments/assets/e15b706a-f3e6-4ae7-a340-e4747cd61742" />
+### Book List
+<img width="300" alt="Book List" src="https://github.com/user-attachments/assets/e15b706a-f3e6-4ae7-a340-e4747cd61742" />
 
-- Borrow Books
-  <img width="539" height="1103" alt="image" src="https://github.com/user-attachments/assets/1a7788ce-57d5-4308-894e-4607060f9c19" />
-
+### Borrow Books
+<img width="300" alt="Borrow Books" src="https://github.com/user-attachments/assets/1a7788ce-57d5-4308-894e-4607060f9c19" />
 
 ## Technologies Used
 
@@ -38,9 +38,11 @@ This is a Book Borrowing Management App built using Android (Java) for the front
 ## Setup Instructions
 
 1. Clone the repository:
+   ```bash
    git clone https://github.com/yourusername/book-borrow-app.git
+   ```
 
-2. Open the project in Android Studio
+2. Open the project in Android Studio.
 
 3. Make sure the backend Spring Boot API is running on your machine or server.
 
@@ -56,4 +58,3 @@ app/
 ├── adapters/
 └── utils/
 ```
-
