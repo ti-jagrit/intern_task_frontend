@@ -11,38 +11,9 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true" />
 
-    <LinearLayout
-        android:id="@+id/linear_buttons"
-        android:orientation="horizontal"
-        android:layout_below="@id/spinnerBorrowers"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp">
-
-        <Button
-            android:id="@+id/btnViewBorrows"
-            android:layout_weight="1"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="4dp"
-            android:text="View by\nBorrower"
-            android:maxLines="2"
-            android:ellipsize="end" />
-
-        <Button
-            android:id="@+id/btnViewAllBorrows"
-            android:layout_weight="1"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="4dp"
-            android:text="View\nAll Borrows"
-            android:maxLines="2"
-            android:ellipsize="end" />
-    </LinearLayout>
-
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_view_borrows"
-        android:layout_below="@id/linear_buttons"
+        android:layout_below="@id/spinnerBorrowers"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@+id/fabAddBorrow"

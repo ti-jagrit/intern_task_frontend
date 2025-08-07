@@ -1,13 +1,33 @@
 package com.jtim.bookborrowapp.models;
 
+import com.google.gson.annotations.SerializedName;
+import com.jtim.bookborrowapp.ui.DialogBorrow.BookQuantity;
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class BorrowRequest {
-    private int borrowerId;
-    private List<Integer> bookIds;
 
-    public BorrowRequest(int bId, List<Integer> bIds) {
-        this.borrowerId = bId;
-        this.bookIds = bIds;
+    @SerializedName("borrowerId")
+    private int borrowerId;
+
+    @SerializedName("bookQuantities")
+    private Map<Integer, Integer> bookQuantities;
+
+    public BorrowRequest(int borrowerId, List<BookQuantity> quantities) {
+        this.borrowerId = borrowerId;
+        this.bookQuantities = new HashMap<>();
+        for (BookQuantity bq : quantities) {
+            this.bookQuantities.put(bq.getBookId(), bq.getQuantity());
+        }
+    }
+
+    public int getBorrowerId() {
+        return borrowerId;
+    }
+
+    public Map<Integer, Integer> getBookQuantities() {
+        return bookQuantities;
     }
 }

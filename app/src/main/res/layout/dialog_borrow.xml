@@ -17,21 +17,26 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Select Books"
+        android:text="Select Books and Quantity"
         android:layout_marginTop="10dp" />
 
-    <ListView
-        android:id="@+id/listBooks"
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="200dp"
-        android:choiceMode="multipleChoice" />
+        android:layout_marginBottom="10dp">
+
+        <LinearLayout
+            android:id="@+id/containerBooks"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"/>
+    </ScrollView>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:gravity="end"
-        android:layout_marginTop="10dp">
+        android:gravity="end">
 
         <Button
             android:id="@+id/btnCancelBorrow"

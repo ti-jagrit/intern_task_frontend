@@ -1,8 +1,8 @@
 package com.jtim.bookborrowapp.ui;
 
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
@@ -18,6 +18,8 @@ import com.jtim.bookborrowapp.api.BorrowApi;
 import com.jtim.bookborrowapp.api.BorrowerApi;
 import com.jtim.bookborrowapp.models.*;
 
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,7 +30,6 @@ import retrofit2.Response;
 public class BorrowsActivity extends AppCompatActivity {
 
     private Spinner borrowerSpinner;
-    private Button btnView, btnViewAll;
     private RecyclerView recyclerView;
     private FloatingActionButton btnBorrow;
 
@@ -47,8 +48,6 @@ public class BorrowsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_borrow_filter);
 
         borrowerSpinner = findViewById(R.id.spinnerBorrowers);
-        btnView = findViewById(R.id.btnViewBorrows);
-        btnViewAll = findViewById(R.id.btnViewAllBorrows);
         btnBorrow = findViewById(R.id.fabAddBorrow);
         recyclerView = findViewById(R.id.recycler_view_borrows);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -59,17 +58,8 @@ public class BorrowsActivity extends AppCompatActivity {
         borrowerApi = ApiClient.getClient(this).create(BorrowerApi.class);
         bookApi = ApiClient.getClient(this).create(BookApi.class);
 
-        loadBorrowers();
-
-        btnView.setOnClickListener(v -> {
-            int pos = borrowerSpinner.getSelectedItemPosition();
-            if (pos >= 0 && !borrowerList.isEmpty()) {
-                int borrowerId = borrowerList.get(pos).getId();
-                loadBorrowsByBorrower(borrowerId);
-            }
-        });
-
-        btnViewAll.setOnClickListener(v -> loadAllBorrows());
+        loadAllBorrows();    // Load all borrows by default
+        loadBorrowers();     // Then set up spinner to filter
 
         btnBorrow.setOnClickListener(v -> fetchBooksAndOpenDialog());
     }
@@ -80,10 +70,30 @@ public class BorrowsActivity extends AppCompatActivity {
             public void onResponse(Call<BorrowerResponseWrapper> call, Response<BorrowerResponseWrapper> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     borrowerList = response.body().getData().getContent();
+
                     List<String> names = new ArrayList<>();
+                    names.add("All Borrowers"); // First item
                     for (Borrower b : borrowerList) names.add(b.getBorrowerName());
-                    borrowerSpinner.setAdapter(new ArrayAdapter<>(BorrowsActivity.this,
-                            android.R.layout.simple_spinner_dropdown_item, names));
+
+                    ArrayAdapter<String> adapter = new ArrayAdapter<>(BorrowsActivity.this,
+                            android.R.layout.simple_spinner_dropdown_item, names);
+                    borrowerSpinner.setAdapter(adapter);
+
+                    borrowerSpinner.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
+                        @Override
+                        public void onItemSelected(android.widget.AdapterView<?> parent, View view, int position, long id) {
+                            if (position == 0) {
+                                loadAllBorrows(); // All
+                            } else {
+                                int borrowerId = borrowerList.get(position - 1).getId();
+                                loadBorrowsByBorrower(borrowerId);
+                            }
+                        }
+
+                        @Override
+                        public void onNothingSelected(android.widget.AdapterView<?> parent) { }
+                    });
+
                 } else {
                     Toast.makeText(BorrowsActivity.this, "Failed to load borrowers", Toast.LENGTH_SHORT).show();
                 }
@@ -142,28 +152,50 @@ public class BorrowsActivity extends AppCompatActivity {
             public void onResponse(Call<BookResponseWrapper> call, Response<BookResponseWrapper> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     List<Book> books = response.body().getData().getContent();
-                    new DialogBorrow(BorrowsActivity.this, borrowerList, books, (borrowerId, bookIds) -> {
-                        borrowApi.createBorrow(new BorrowRequest(borrowerId, bookIds))
-                                .enqueue(new Callback<Void>() {
-                                    @Override
-                                    public void onResponse(Call<Void> call, Response<Void> response) {
-                                        Toast.makeText(BorrowsActivity.this, "Borrowed successfully", Toast.LENGTH_SHORT).show();
-                                        loadAllBorrows();
-                                    }
 
-                                    @Override
-                                    public void onFailure(Call<Void> call, Throwable t) {
-                                        Toast.makeText(BorrowsActivity.this, "Borrow failed: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                    new DialogBorrow(BorrowsActivity.this, borrowerList, books, (borrowerId, bookQuantities) -> {
+
+                        BorrowRequest borrowRequest = new BorrowRequest(borrowerId, bookQuantities);
+
+                        borrowApi.createBorrow(borrowRequest).enqueue(new Callback<Void>() {
+                            @Override
+                            public void onResponse(Call<Void> call, Response<Void> response) {
+                                if (response.isSuccessful()) {
+                                    Toast.makeText(BorrowsActivity.this, "Borrowed successfully", Toast.LENGTH_SHORT).show();
+                                    loadAllBorrows();
+                                } else {
+                                    try {
+                                        String errorMsg = "Borrow failed";
+                                        if (response.errorBody() != null) {
+                                            String errorBody = response.errorBody().string();
+                                            JSONObject json = new JSONObject(errorBody);
+                                            errorMsg = json.optString("message", errorMsg);
+                                        }
+                                        Toast.makeText(BorrowsActivity.this, errorMsg, Toast.LENGTH_LONG).show();
+                                    } catch (Exception e) {
+                                        Toast.makeText(BorrowsActivity.this, "Error parsing server response", Toast.LENGTH_SHORT).show();
                                     }
-                                });
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(Call<Void> call, Throwable t) {
+                                Toast.makeText(BorrowsActivity.this, "Borrow failed: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                            }
+                        });
+
                     }).show();
+                } else {
+                    Toast.makeText(BorrowsActivity.this, "Failed to fetch books", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<BookResponseWrapper> call, Throwable t) {
-                Toast.makeText(BorrowsActivity.this, "Failed to fetch books", Toast.LENGTH_SHORT).show();
+                Toast.makeText(BorrowsActivity.this, "Error fetching books: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
+
 }
+
